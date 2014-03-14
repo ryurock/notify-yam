@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+# -*- coding: utf-8 -*-
+
+require 'notify/yam'
+require 'notify/yam/version'
+require 'optparse'
+require 'pp'
+require 'yammer'
+
+opts = {}
+yam_opts = {}
+
+OptionParser.new do |opt|
+  opt.version = Notify::Yam::VERSION
+  opt.banner= 'notify-yam argument [options]'
+  opt.on('-t', '--token=YAMMER_TOKEN', 'Yammer API token'){ |v| opts[:token] = v }
+  opt.on('-m', '--message=MESSAGE', 'Yammer Notify Create Message Body'){ |v| opts[:message] = v }
+  opt.on('-g', '--group_id=GROUP_ID', 'Yammer Notify Terget Group Id'){ |v| opts[:group_id] = v }
+  opt.on('-r', '--replied_to_id=REPLIED_TO_ID', 'Yammer Notify Terget replied to id'){ |v| opts[:replied_to_id] = v }
+  opt.permute!(ARGV)
+end
+
+raise "Error. opts Yammer API token" unless opts.key?(:token)
+raise "Error. require opts message body" unless opts.key?(:message)
+
+Yammer.configure{ |c| c.access_token = opts[:token] }
+
+yam_opts[:group_id] = opts[:group_id] if opts.key?(:group_id)
+yam_opts[:replied_to_id] = opts[:replied_to_id] if opts.key?(:replied_to_id)
+
+Yammer.create_message(opts[:message], yam_opts)
